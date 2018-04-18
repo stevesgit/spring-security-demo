@@ -4,7 +4,7 @@
 package cn.steve.security.core.properties;
 
 /**
- * @author zhailiang
+ * @author SteveWoo
  *
  */
 public enum LoginResponseType {

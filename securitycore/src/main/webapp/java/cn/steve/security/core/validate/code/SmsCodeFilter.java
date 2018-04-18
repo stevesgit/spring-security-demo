@@ -29,7 +29,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 
 /**
- * @author Steve Woo
+ * @author SteveWoo
  */
 public class SmsCodeFilter extends OncePerRequestFilter {
     private AuthenticationFailureHandler authenticationFailureHandler;
@@ -81,7 +81,7 @@ public class SmsCodeFilter extends OncePerRequestFilter {
 
     private void validate(ServletWebRequest request) throws ServletRequestBindingException {
         SmsCode codeInSession = (SmsCode) sessionStrategy.getAttribute(request,
-                ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
+                "SESSION_KEY_FOR_CODE_" + "SMS");
         String codeInRequest = ServletRequestUtils.getStringParameter(request.getRequest(), "smsCode");
 
         if (StringUtils.isBlank(codeInRequest)) {
@@ -98,13 +98,13 @@ public class SmsCodeFilter extends OncePerRequestFilter {
 
 
         if (codeInSession.isExpried()) {
-            sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
+            sessionStrategy.removeAttribute(request, "SESSION_KEY_FOR_CODE_" + "SMS");
             throw new ValidateCodeException("验证码已经过期");
         }
         if (!StringUtils.equals(codeInSession.getCode(), codeInRequest)) {
             throw new ValidateCodeException("验证码不匹配");
         }
-        sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
+        sessionStrategy.removeAttribute(request, "SESSION_KEY_FOR_CODE_" + "SMS");
 
     }
 

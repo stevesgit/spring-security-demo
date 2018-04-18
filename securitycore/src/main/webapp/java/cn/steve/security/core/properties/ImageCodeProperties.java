@@ -8,7 +8,7 @@ public class ImageCodeProperties {
     private int height = 23;
     private int length = 60;
     private int expireIn = 60;
-    private String url;
+    private String url = "";
 
     public String getUrl() {
         return url;

@@ -6,7 +6,7 @@ package cn.steve.security.core.validate.code;
 import org.springframework.security.core.AuthenticationException;
 
 /**
- * @author zhailiang
+ * @author SteveWoo
  *
  */
 public class ValidateCodeException extends AuthenticationException {

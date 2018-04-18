@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 /**
+ * 图片验证码生成器
  * Created By SteveWoo
  */
 public class ImageCodeGenerator implements ValidateCodeGenerator {
