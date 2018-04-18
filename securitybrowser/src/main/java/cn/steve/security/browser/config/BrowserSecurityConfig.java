@@ -1,7 +1,9 @@
 package cn.steve.security.browser.config;
 
 import cn.steve.security.browser.MyUserDetailService;
+import cn.steve.security.core.authentication.mobile.SmsCodeAuthenticationSecurityConfig;
 import cn.steve.security.core.properties.SecurityProperties;
+import cn.steve.security.core.validate.code.SmsCodeFilter;
 import cn.steve.security.core.validate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,33 +35,41 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationFailureHandler securityAuthenticationFailureHandler;
     @Autowired
     private DataSource dataSource;
+    @Autowired
+    SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
         validateCodeFilter.setAuthenticationFailureHandler(securityAuthenticationFailureHandler);
-        System.out.println(securityProperties.getCode().getImage().getUrl());
         validateCodeFilter.setSecurityProperties(securityProperties);
         validateCodeFilter.afterPropertiesSet();
+        SmsCodeFilter smsCodeFilter = new SmsCodeFilter();
+        smsCodeFilter.setAuthenticationFailureHandler(securityAuthenticationFailureHandler);
+        smsCodeFilter.setSecurityProperties(securityProperties);
+        smsCodeFilter.afterPropertiesSet();
         http
+                .addFilterBefore(smsCodeFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin()
-                    .loginPage("/authentication/require")
-                    .loginProcessingUrl("/authentication/form")
-                    .successHandler(securityAuthenticationSuccessHandler)
-                    .failureHandler(securityAuthenticationFailureHandler)
-                    .and()
+                .loginPage("/authentication/require")
+                .loginProcessingUrl("/authentication/form")
+                .successHandler(securityAuthenticationSuccessHandler)
+                .failureHandler(securityAuthenticationFailureHandler)
+                .and()
                 .rememberMe()
-                    .tokenRepository(persistentTokenRepository())
-                    .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
-                    .userDetailsService(userDetailsService)
-                    .and()
+                .tokenRepository(persistentTokenRepository())
+                .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
+                .userDetailsService(userDetailsService)
+                .and()
                 .authorizeRequests()
-                .antMatchers("/authentication/require", securityProperties.getLoginPage(), "/code/image")
+                .antMatchers("/authentication/require", securityProperties.getLoginPage(), "/code/image","/code/sms")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
-                .csrf().disable();
+                .csrf().disable()
+                .apply(smsCodeAuthenticationSecurityConfig);
 //        http
 //                .authorizeRequests()
 //                .anyRequest().authenticated()

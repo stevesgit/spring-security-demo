@@ -3,6 +3,7 @@ package cn.steve.security.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 /**
  * Created By SteveWoo
  */
+@Primary
 @Component
 public class MyUserDetailsService implements UserDetailsService {
     Logger logger = LoggerFactory.getLogger(getClass());

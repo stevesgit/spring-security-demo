@@ -22,7 +22,7 @@ import java.io.IOException;
 public class ValidateCodeController {
     @Autowired
     private SecurityProperties securityProperties;
-    public static final String SESSION_KEY = "SESSION_KEY_IMAGE_CODE";
+    public static final String SESSION_KEY_PREFIX = "SESSION_KEY_";
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
     @Autowired
     @Qualifier("imageCodeGenerator")
@@ -34,8 +34,8 @@ public class ValidateCodeController {
     @GetMapping("/code/image")
     public void creteCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ImageCode imageCode = (ImageCode) codeGenerator.generate(new ServletWebRequest(request));
-        System.out.println(imageCode.getCode());
-        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY, imageCode);
+//        System.out.println(imageCode.getCode());
+        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY_PREFIX + "IMAGE", imageCode);
         ImageIO.write(imageCode.getImage(), "JPEG", response.getOutputStream());
     }
 
@@ -43,8 +43,9 @@ public class ValidateCodeController {
     @GetMapping("/code/sms")
     public void creteSmsCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ValidateCode smsCode = smsCodeGenerator.generate(new ServletWebRequest(request));
+        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY_PREFIX+"SMS", smsCode);
         System.out.println(smsCode.getCode());
-        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY, smsCode);
+
         //短信发送
 //        ImageIO.write(smsCode.getImage(), "JPEG", response.getOutputStream());
     }

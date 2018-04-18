@@ -1,7 +1,8 @@
-/**
- *
- */
 package cn.steve.security.core.validate.code;
+
+/**
+ * Created By SteveWoo
+ */
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import cn.steve.security.core.properties.SecurityProperties;
-import cn.steve.security.core.validate.code.image.ImageCode;
+import cn.steve.security.core.validate.code.sms.SmsCode;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
@@ -30,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 /**
  * @author Steve Woo
  */
-public class ValidateCodeFilter extends OncePerRequestFilter {
+public class SmsCodeFilter extends OncePerRequestFilter {
     private AuthenticationFailureHandler authenticationFailureHandler;
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
     private SecurityProperties securityProperties;
@@ -48,11 +49,12 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
     @Override
     public void afterPropertiesSet() throws ServletException {
         super.afterPropertiesSet();
-        String[] ConfigUrls = StringUtils.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getImage().getUrl(), ",");
+        String[] ConfigUrls = StringUtils.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getSms().getUrl(), ",");
+        System.out.println(ConfigUrls);
         for (String configUrl : ConfigUrls) {
             urls.add(configUrl);
         }
-        urls.add("/authentication/form");
+        urls.add("/authentication/mobile");
     }
 
     @Override
@@ -78,14 +80,15 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
     }
 
     private void validate(ServletWebRequest request) throws ServletRequestBindingException {
-        ImageCode codeInSession = (ImageCode) sessionStrategy.getAttribute(request,
-                ValidateCodeController.SESSION_KEY_PREFIX+"IMAGE");
-        String codeInRequest = ServletRequestUtils.getStringParameter(request.getRequest(), "imageCode");
+        SmsCode codeInSession = (SmsCode) sessionStrategy.getAttribute(request,
+                ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
+        String codeInRequest = ServletRequestUtils.getStringParameter(request.getRequest(), "smsCode");
+
         if (StringUtils.isBlank(codeInRequest)) {
-            throw new ValidateCodeException("验证码的值不能为空");
+            throw new ValidateCodeException("短信验证码的值不能为空");
         }
         if (codeInSession == null) {
-            throw new ValidateCodeException("验证码不存在");
+            throw new ValidateCodeException("短信验证码不存在");
         }
         System.out.println(codeInSession.getCode());
         System.out.println(codeInSession);
@@ -95,13 +98,13 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
 
 
         if (codeInSession.isExpried()) {
-            sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX+"IMAGE");
+            sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
             throw new ValidateCodeException("验证码已经过期");
         }
         if (!StringUtils.equals(codeInSession.getCode(), codeInRequest)) {
             throw new ValidateCodeException("验证码不匹配");
         }
-        sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX+"IMAGE");
+        sessionStrategy.removeAttribute(request, ValidateCodeController.SESSION_KEY_PREFIX + "SMS");
 
     }
 
