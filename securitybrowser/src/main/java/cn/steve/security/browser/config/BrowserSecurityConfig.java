@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -16,6 +17,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 
 @EnableWebSecurity
@@ -28,7 +31,8 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
     private AuthenticationSuccessHandler securityAuthenticationSuccessHandler;
     @Autowired
     private AuthenticationFailureHandler securityAuthenticationFailureHandler;
-
+    @Autowired
+    private DataSource dataSource;
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         ValidateCodeFilter validateCodeFilter = new ValidateCodeFilter();
@@ -39,11 +43,16 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin()
-                .loginPage("/authentication/require")
-                .loginProcessingUrl("/authentication/form")
-                .successHandler(securityAuthenticationSuccessHandler)
-                .failureHandler(securityAuthenticationFailureHandler)
-                .and()
+                    .loginPage("/authentication/require")
+                    .loginProcessingUrl("/authentication/form")
+                    .successHandler(securityAuthenticationSuccessHandler)
+                    .failureHandler(securityAuthenticationFailureHandler)
+                    .and()
+                .rememberMe()
+                    .tokenRepository(persistentTokenRepository())
+                    .tokenValiditySeconds(securityProperties.getBrowser().getRememberMeSeconds())
+                    .userDetailsService(userDetailsService)
+                    .and()
                 .authorizeRequests()
                 .antMatchers("/authentication/require", securityProperties.getLoginPage(), "/code/image")
                 .permitAll()
@@ -65,11 +74,12 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public PersistentTokenRepository persistentTokenRepository() {
-//        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
-//        return tokenRepository;
-//    }
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource);
+        return tokenRepository;
+    }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {

@@ -5,7 +5,7 @@ package cn.steve.security.core.properties;
  */
 public class ValidateCodeProperties {
     private ImageCodeProperties image = new ImageCodeProperties();
-    private BrowserProperties browser = new BrowserProperties();
+    private SmsCodeProperties sms = new SmsCodeProperties();
 
     public ImageCodeProperties getImage() {
         return image;
@@ -15,11 +15,11 @@ public class ValidateCodeProperties {
         this.image = image;
     }
 
-    public BrowserProperties getBrowser() {
-        return browser;
+    public SmsCodeProperties getSms() {
+        return sms;
     }
 
-    public void setBrowser(BrowserProperties browser) {
-        this.browser = browser;
+    public void setSms(SmsCodeProperties sms) {
+        this.sms = sms;
     }
 }

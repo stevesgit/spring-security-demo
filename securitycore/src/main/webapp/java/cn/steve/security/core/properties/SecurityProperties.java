@@ -1,18 +1,19 @@
 package cn.steve.security.core.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
  * Created By SteveWoo
  */
 @Component
+@Primary
 @ConfigurationProperties(prefix = "steve.security")
 public class SecurityProperties {
     private String loginPage = "login.html";
     private BrowserProperties browser = new BrowserProperties();
     private ValidateCodeProperties code = new ValidateCodeProperties();
-
 
     public BrowserProperties getBrowser() {
         return browser;

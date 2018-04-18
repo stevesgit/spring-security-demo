@@ -1,7 +1,9 @@
-package cn.steve.security.core.properties;
+package cn.steve.security.core.validate.code;
 
+import cn.steve.security.core.properties.SecurityProperties;
 import cn.steve.security.core.validate.code.ValidateCodeGenerator;
 import cn.steve.security.core.validate.code.image.ImageCodeGenerator;
+import cn.steve.security.core.validate.code.sms.SmsCodeSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -23,4 +25,9 @@ public class ValidateCodeBeanConfig {
         return codeGenerator;
     }
 
+//    @Bean
+//    @ConditionalOnMissingBean(SmsCodeSender.class)
+//    public SmsCodeSender() {
+//        new
+//    }
 }

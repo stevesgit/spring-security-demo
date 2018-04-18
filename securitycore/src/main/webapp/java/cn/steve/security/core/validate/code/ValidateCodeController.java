@@ -3,6 +3,7 @@ package cn.steve.security.core.validate.code;
 import cn.steve.security.core.properties.SecurityProperties;
 import cn.steve.security.core.validate.code.image.ImageCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,17 +25,28 @@ public class ValidateCodeController {
     public static final String SESSION_KEY = "SESSION_KEY_IMAGE_CODE";
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
     @Autowired
+    @Qualifier("imageCodeGenerator")
     private ValidateCodeGenerator codeGenerator;
+    @Autowired
+    @Qualifier("smsCodeGenerator")
+    private ValidateCodeGenerator smsCodeGenerator;
 
     @GetMapping("/code/image")
     public void creteCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ImageCode imageCode = codeGenerator.generate(new ServletWebRequest(request));
+        ImageCode imageCode = (ImageCode) codeGenerator.generate(new ServletWebRequest(request));
         System.out.println(imageCode.getCode());
         sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY, imageCode);
-        ImageCode codeInSession = (ImageCode) sessionStrategy.getAttribute(new ServletWebRequest(request),
-                ValidateCodeController.SESSION_KEY);
-        System.out.println(codeInSession.getCode());
         ImageIO.write(imageCode.getImage(), "JPEG", response.getOutputStream());
+    }
+
+
+    @GetMapping("/code/sms")
+    public void creteSmsCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ValidateCode smsCode = smsCodeGenerator.generate(new ServletWebRequest(request));
+        System.out.println(smsCode.getCode());
+        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY, smsCode);
+        //短信发送
+//        ImageIO.write(smsCode.getImage(), "JPEG", response.getOutputStream());
     }
 
 
